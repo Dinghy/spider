@@ -37,9 +37,10 @@ def GetItemList(strRoot,strUrl,strAppendix,urlPast):
     # 分析下一页href的正则
     patternNext = u"(下页|下一页|下一翻页)"
     patternMatchName = u"(仪器名称|中文名称|设备名称|名称)"
+    patternMatchPlace = u"(所在单位|所属单位|依托单位|单位)"
 
     iNum = 1
-    iDownloadLimit = 600
+    iDownloadLimit = 1
     arrUrlItem = {}
     # 拼接url及查询字段
     strParse = urlparse.urlparse(strUrl)
@@ -67,24 +68,30 @@ def GetItemList(strRoot,strUrl,strAppendix,urlPast):
         arrTr = soupTable('tr')
         if len(arrTr) > 1:
             # 生成默认仪器名称
-            iName = 0
+            iName = -1
+            iPlace = -1
             arrFirstTr = arrTr[0](re.compile("(th|td)"))
             for iTd in xrange(len(arrFirstTr)):
                 if re.search(patternMatchName,arrFirstTr[iTd].get_text()):
                     iName = iTd
-                    break
+                elif re.search(patternMatchPlace,arrFirstTr[iTd].get_text()):
+                    iPlace = iTd
             # 是否有超链接 
             iLenTd = len(arrTr[1](re.compile("(th|td)"))) # len(arrTr[0]('td'))
             for i in xrange(1,len(arrTr)):
                 arrTempTd = arrTr[i](re.compile("(th|td)"))
-                if len(arrTempTd) == iLenTd and iLenTd >= iName:
+                if len(arrTempTd) == iLenTd and iLenTd >= iName and iLenTd >= iPlace:
                     arrA = arrTr[i].findAll('a',href=re.compile('\S+'))
                     if len(arrA) > 0:
                         iItemInstru += 1
                         # 拼接url
                         strFullHrefUrl = UrlConnect(soup,strRoot,arrA[0]['href'])
                         if strFullHrefUrl not in urlPast:
-                            arrUrlItem[strFullHrefUrl] = ''.join(re.findall("\S+",arrTempTd[iName].get_text()))
+                            arrUrlItem[strFullHrefUrl] = ["",""]
+                            if iName >= 0:
+                                arrUrlItem[strFullHrefUrl][0] = ''.join(re.findall("\S+",arrTempTd[iName].get_text()))
+                            if iPlace >= 0:
+                                arrUrlItem[strFullHrefUrl][1] = ''.join(re.findall("\S+",arrTempTd[iPlace].get_text()))
                             urlPast.append(strFullHrefUrl)
                             print arrA[0]['href']
                         else:
@@ -177,7 +184,8 @@ def GetItemDetail(arrUrlItem):
         dicItem = {}
         for itemCheck in dicCheckCha:
             dicItem[dicCheckCha[itemCheck]] = ""
-        dicItem["Name"] = arrUrlItem[strUrlItem]
+        dicItem["Name"] = arrUrlItem[strUrlItem][0]
+        dicItem["Place"] = arrUrlItem[strUrlItem][1]
         # 获取需要的soup
         strCon = GetContents(strUrlItem,3)
         if not cmp(strCon,"Failure") == 0:
@@ -203,7 +211,6 @@ def GetItemDetail(arrUrlItem):
                             for itemCheck in dicCheckCha:
                                 if re.search(itemCheck,strItemTd) and len(dicItem[dicCheckCha[itemCheck]]) == 0:
                                     dicItem[dicCheckCha[itemCheck]] = strItemTdNext
-                                    print strItemTd+'\t'+strItemTdNext
                                     break
                 
         # 如果有名称信息
