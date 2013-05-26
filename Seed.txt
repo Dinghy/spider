@@ -1,0 +1,15 @@
+http://search.sgst.cn/wcm/search/eshare/searchGBK.jsp	pageNo
+http://www.nxdy.org/site/nxdy.html	pageNo
+http://www.fjdy.org.cn/
+http://search.cas.cn/sourcedb/kjtj/equip_kjtj.jsp	page
+http://www.jxky.cn/
+http://www.gzsin.cn/
+http://www.hsis.org.cn/index.do
+http://www.hfkc.gov.cn/
+http://www.hasis.cn/
+http://www.gzsin.cn/
+http://www.cers.edu.cn/
+http://www.ahbbky.cn/news/shebei_showclass_sbfl_4.asp?classid=1
+http://dxyq.zzsdc.com/project/as/queryApparatus.do
+http://www.yqgx.org/	currentpage
+http://www.kytj.com/	CurrentPage
