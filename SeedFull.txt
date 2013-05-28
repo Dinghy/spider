@@ -1,0 +1,15 @@
+http://uias.czstb.gov.cn/dy/yqlist.jsp?clear=y	null	null
+http://www.dxyq.zj.cn/page/main/search.do	null	null
+http://www.kytj.com/	CurrentPage	null
+http://www.yqgx.org/	currentpage	主办
+http://dxyq.zzsdc.com/project/as/queryApparatus.do	null	技术支持
+http://www.ahbbky.cn/news/shebei_showclass_sbfl_4.asp?classid=1	null	null
+http://www.cers.edu.cn/	null	crsp800@gmail.com
+http://www.hasis.cn/	null	null
+http://www.hfkc.gov.cn/	null	科技呼叫中心
+http://www.hsis.org.cn/index.do	null	联系我们
+http://www.gzsin.cn/	null	版权所有
+http://www.jxky.cn/	null	联系我们
+http://search.cas.cn/sourcedb/kjtj/equip_kjtj.jsp	page	大型设备查询
+http://www.nxdy.org/site/nxdy.html	pageNo	版权所有
+http://search.sgst.cn/wcm/search/eshare/searchGBK.jsp	pageNo	联系我们
