@@ -1,15 +1,20 @@
-http://uias.czstb.gov.cn/dy/yqlist.jsp?clear=y	null	null
-http://www.dxyq.zj.cn/page/main/search.do	null	null
-http://www.kytj.com/	CurrentPage	null
-http://www.yqgx.org/	currentpage	主办
-http://dxyq.zzsdc.com/project/as/queryApparatus.do	null	技术支持
-http://www.ahbbky.cn/news/shebei_showclass_sbfl_4.asp?classid=1	null	null
-http://www.cers.edu.cn/	null	crsp800@gmail.com
-http://www.hasis.cn/	null	null
-http://www.hfkc.gov.cn/	null	科技呼叫中心
-http://www.hsis.org.cn/index.do	null	联系我们
-http://www.gzsin.cn/	null	版权所有
-http://www.jxky.cn/	null	联系我们
-http://search.cas.cn/sourcedb/kjtj/equip_kjtj.jsp	page	大型设备查询
-http://www.nxdy.org/site/nxdy.html	pageNo	版权所有
-http://search.sgst.cn/wcm/search/eshare/searchGBK.jsp	pageNo	联系我们
+http://uias.czstb.gov.cn/dy/yqlist.jsp?clear=y	null	仪器名称	上传图片
+http://www.dxyq.zj.cn/page/main/search.do	null	主要技术指标	 服 务 实 例
+http://www.kytj.com/	CurrentPage	主要技术指标	信息更新时间
+http://www.yqgx.org/	currentpage	技术指标	主办
+http://dxyq.zzsdc.com/project/as/queryApparatus.do	null	技术指标	功能及特色
+http://www.ahbbky.cn/news/shebei_showclass_sbfl_1.asp?classid=1	null	主要技术指标	仪器分类
+http://www.cers.edu.cn/	null	主要技术指标	主要测试研究领域
+http://www.hasis.cn/	null	技术指标	启用时间
+
+http://www.hfkc.gov.cn/	d-3991783-p	主要技术指标	先进程度
+http://www.hsis.org.cn/index.do	null	null	联系我们
+http://www.gzsin.cn/	null	功能用途	仪器所在单位信息
+http://www.jxky.cn/	null	仪器型号规格	生产厂商
+http://search.cas.cn/sourcedb/kjtj/equip_kjtj.jsp	page	所属子系统	大型设备查询
+http://www.nxdy.org/site/nxdy.html	pageNo	型号规格	版权所有
+http://search.sgst.cn/wcm/search/eshare/searchGBK.jsp	pageNo	功能/应用范围	详细信息与指标结束
+
+
+
+st = GetContents("http://www.hasis.cn/yqshow.jsp?idd=410104410009",3);bs = BeautifulSoup(st);print bs.get_text()
