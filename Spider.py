@@ -65,6 +65,8 @@ def GetItemList(strRoot,strUrl,strAppendix,urlPast):
         soup = BeautifulSoup(strCon)    # bs
         # 解析是否为目录页
         soupTable = GetSoupTable(strUrl,soup)
+        if len(soupTable) == 0:
+            break
         arrTr = soupTable('tr')
         if len(arrTr) > 1:
             # 生成默认仪器名称
