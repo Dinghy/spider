@@ -40,7 +40,7 @@ def GetItemList(strRoot,strUrl,strAppendix,urlPast):
     patternMatchPlace = u"(所在单位|所属单位|依托单位|单位)"
 
     iNum = 1
-    iDownloadLimit = 1
+    iDownloadLimit = 600
     arrUrlItem = {}
     # 拼接url及查询字段
     strParse = urlparse.urlparse(strUrl)
@@ -107,6 +107,7 @@ def GetItemList(strRoot,strUrl,strAppendix,urlPast):
             for item in soup('a'):
                 if re.search(patternNext,item.get_text()):
                     strUrl = item['href']
+                    print "Next:"+strUrl
                     if not re.search("=",strUrl):
                         strUrl = ""
             # 增加标号，读取下一个页面
@@ -159,17 +160,17 @@ def GetSoupTable(strUrl,soup):
 
 
 # 下载仪器信息
-def GetItemDetail(arrUrlItem,strObmit):
+def GetItemDetail(arrUrlItem,strStart,strEnd):
     global strFileData
     #名称、机构、管理员、联系方式、网址、是否开放、收费标准的匹配规则
-    dicCheckCha = {u"(?:仪器|中文|设备)名称":"Name",
-                   u"(?:单位名称|所在单位|所属单位|依托单位)(?!内)":"Place",
-                   u"(?:地址|所在城市|安放地点|所在省市)":"Addr",
-                   u"(?:负责人|联系人|联络员)":"Contact",
-                   u"(?:Tel|电话)":"Tel",
-                   u"(?:mail|邮箱|邮件|信箱)(?!\.com)":"Email",
+    dicCheckCha = {u"(?:仪器|中文|设备)名称":"name",
+                   u"(?:单位名称|所在单位|所属单位|依托单位)(?!内)":"institute",
+                   u"(?:地址|所在城市|安放地点|所在省市)":"place",
+                   u"(?:负责人|联系人|联络员)":"admin",
+                   u"(?:Tel|电话)":"orderphone",
+                   u"(?:mail|邮箱|邮件|信箱)(?!\.com)":"orderemail",
                    u"(?:使用方式|共享方式|共享状态|共享级别|开放形式)":"Open",
-                   u"(?:收费标准|占用费\(元\))":"Cost"}
+                   u"(?:收费标准|占用费\(元\))":"fee"}
     # 电话及邮箱的正则表达式
     patternTel = u"[0-9\-\+×]{6,20}"
     patternMail = "\w+@\w+\.\w+"
@@ -183,8 +184,8 @@ def GetItemDetail(arrUrlItem,strObmit):
         dicItem = {}
         for itemCheck in dicCheckCha:
             dicItem[dicCheckCha[itemCheck]] = ""
-        dicItem["Name"] = arrUrlItem[strUrlItem][0]
-        dicItem["Place"] = arrUrlItem[strUrlItem][1]
+        dicItem["name"] = arrUrlItem[strUrlItem][0]
+        dicItem["institute"] = arrUrlItem[strUrlItem][1]
         # 获取需要的soup
         strCon = GetContents(strUrlItem,3)
         if not cmp(strCon,"Failure") == 0:
@@ -214,39 +215,44 @@ def GetItemDetail(arrUrlItem,strObmit):
                                         break
                 
         # 如果有名称信息
-        if len(dicItem['Name']) > 0:
+        if len(dicItem['name']) > 0 and not re.search(u"条记录",dicItem['name']):
             # 电话及邮箱信息的正则表达式检测
-            arrTel = re.findall(patternTel,dicItem["Tel"])
-            arrMail = re.findall(patternMail,dicItem["Email"])
+            arrTel = re.findall(patternTel,dicItem["orderphone"])
+            arrMail = re.findall(patternMail,dicItem["orderemail"])
             if len(arrTel) > 0:
-                dicItem["Tel"] = "\t".join(arrTel)
+                dicItem["orderphone"] = "\t".join(arrTel)
             else:
-                dicItem["Tel"] = ""
+                dicItem["orderphone"] = ""
             if len(arrMail) > 0:
-                dicItem["Email"] = "\t".join(arrMail)
+                dicItem["orderemail"] = "\t".join(arrMail)
             else:
-                dicItem["Tel"] = ""
+                dicItem["orderemail"] = ""
             # 纯文本匹配筛选
+            strDes = ""
+            if len(strStart) > 0 and len(strEnd) > 0:
+                arrAll = re.findall(strStart+"[\s\S]+(?="+strEnd+")",soup.get_text())
+                if len(arrAll) > 0:
+                    strDes = re.sub("[\t\r\f\v ]+","",arrAll[0])
+                    strDes = re.sub("[\n\s]+","\n",strDes)
+            arrAllPoss = re.findall(u"([\s\S]+)(?<="+strEnd+")",soup.get_text())
+            if len(arrAllPoss) > 0:
+                strAllPoss = arrAllPoss[0]
+            else:
+                strAllPoss = ""
             for itemCheck in dicCheckCha:
                 # 是否为空，是否含有冒号
                 if (len(dicItem[dicCheckCha[itemCheck]]) == 0 or re.search(patternDivide,dicItem[dicCheckCha[itemCheck]])) and not cmp(strCon,"Failure") == 0:
                     patternTemp = itemCheck+patternDivide+u"([^\s&]+)"
-                    if len(strObmit) > 0:
-                        strAllPoss = re.findall(u"([\s\S]+)(?<="+strObmit+")",soup.get_text())[0]
-                    else:
-                        strAllPoss = soup.get_text()
                     arrResult = re.findall(patternTemp,strAllPoss)
                     if len(arrResult) > 0 and not re.search(patternDivide,arrResult[0]):
                         dicItem[dicCheckCha[itemCheck]] = arrResult[0]
-            # 加入输出字符串
-            strOutputItem = 'url:'+strUrlItem+'\t'
+            # output
+            strOutputItem = '<item>\n<orderwebsite>'+strUrlItem+'</orderwebsite>\n'
             for itemCheck in dicCheckCha:    
-                if dicCheckCha[itemCheck] not in dicItem:
-                    strOutputItem += dicCheckCha[itemCheck]+":"+"NULL\t"
-                else:
-                    strOutputItem += dicCheckCha[itemCheck]+":"+dicItem[dicCheckCha[itemCheck]]+'\t'
-            strOutput += strOutputItem+"\n"
-            
+                strOutputItem += "<"+dicCheckCha[itemCheck]+">"+dicItem[dicCheckCha[itemCheck]]+"</"+dicCheckCha[itemCheck]+">\n"
+            # 加入网站des信息
+            strOutputItem += "<des>"+strDes+"</des>\n"
+            strOutput += strOutputItem+"</item>\n\n"           
     fileOut.write(strOutput)
     fileOut.close()
     
@@ -330,7 +336,7 @@ def LoadTempFile(urlPast,urlInSite,urlOutSite):
 
 # 给定一个url地址，抓取所有站内url
 # 返回站外链接url
-def Crawler(strSeedUrl,strAppendix,strObmit):
+def Crawler(strSeedUrl,strAppendix,strStart,strEnd):
     urlPast = []    # 该站点访问过的url
     urlInSite = []  # 该站点的url
     urlOutSite = {} # 链接出的url 
@@ -369,7 +375,7 @@ def Crawler(strSeedUrl,strAppendix,strObmit):
                 # 从目录页的仪器页面的下载
                 arrUrlItem = GetItemList(strRoot,strUrl,strAppendix,urlPast)
                 # 下载页面
-                GetItemDetail(arrUrlItem,strObmit)
+                GetItemDetail(arrUrlItem,strStart,strEnd)
                 iInstrument += 1
                 # 忽略目录页上的内部链接（不忽略会引起重复，但对结果没有影响；忽略有一定问题）
                 # continue
@@ -400,10 +406,10 @@ def Crawler(strSeedUrl,strAppendix,strObmit):
 
 if __name__ == '__main__':
     # 数据存储及读取地址
-    strFileData = r"save\Data.txt"
-    strFileOutSite = r"save\Outlink.txt"
+    strFileData = r"save/Data.txt"
+    strFileOutSite = r"save/Outlink.txt"
     strFileSeedInput = r"Seed.txt"
-    strFileTempSave = r"save\SpiderTempSave.txt"
+    strFileTempSave = r"save/SpiderTempSave.txt"
     iTempSave = 2
     bTempLoad = False
     strSeedNow = ""
@@ -429,8 +435,12 @@ if __name__ == '__main__':
             arrSplit[2] = ""
         else:
             arrSplit[2] = arrSplit[2].decode('gbk')
-        if (arrSplit[0],arrSplit[1],arrSplit[2]) not in biSeed:
-            biSeed.append((arrSplit[0],arrSplit[1],arrSplit[2]))
+        if cmp(arrSplit[3],"null") == 0:
+            arrSplit[3] = ""
+        else:
+            arrSplit[3] = arrSplit[3].decode('gbk')
+        if (arrSplit[0],arrSplit[1],arrSplit[2],arrSplit[3]) not in biSeed:
+            biSeed.append((arrSplit[0],arrSplit[1],arrSplit[2],arrSplit[3]))
     fileIn.close()
     # 对目标排序
     # 测试网站
@@ -438,12 +448,13 @@ if __name__ == '__main__':
     for iIter in xrange(len(biSeed)):
         strSeed = biSeed[iIter][0]
         strAppendix = biSeed[iIter][1]
-        strObmit = biSeed[iIter][2]
+        strStart = biSeed[iIter][2]
+        strEnd = biSeed[iIter][3]
         # 如果是要读取临时存档
         if bTempLoad:
             if not cmp(strSeed,strSeedNow) == 0:
                 continue
-        urlOutSite = Crawler(strSeed,strAppendix,strObmit)
+        urlOutSite = Crawler(strSeed,strAppendix,strStart,strEnd)
         # 每爬取完一个网站后存储一次外链
         fileOut = codecs.open(strFileOutSite, "a", "utf-8")
         for item in urlOutSite:
