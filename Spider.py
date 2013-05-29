@@ -413,6 +413,7 @@ if __name__ == '__main__':
     strFileSeedInput = r"Seed.txt"
     strFileTempSave = r"save/SpiderTempSave.txt"
     iTempSave = 2
+    h = "1"
     bTempLoad = False
     strSeedNow = ""
     # 根据输入参数判断是否是需要进行临时文件加载
